@@ -6,6 +6,13 @@ dotenv.config();
 
 const app = express();
 
+//middlaware
+// app.use(express.json());
+// app.use((req,res,next)=>{
+//     console.log("Hey we hit a req, the method is ", req.method, "and the url is ", req.url);
+//     next();
+// });
+
 const PORT = process.env.PORT || 5001;
 
 async function initDB() {
@@ -28,13 +35,38 @@ async function initDB() {
     }
 }
 
-app.get("/",(req,res)=>{
-    res.send("It is working");
+app.get("/", (req, res) => {
+    res.send("It's working");
 });
 
+app.post("/api/transactions", async (req, res) => {
+    //title ,amount, category, user_id
+    try{
+        const { title, amount, category, user_id } = req.body;
 
-initDB().then(()=>{
-    app.listen(PORT,()=>{
+        if(!title || !user_id || !category || amount === undefined){
+            return res.status(400).json({ error: "Missing required fields" });
+        }
+
+        const transaction = await sql`
+            INSERT INTO transactions (title, amount, category, user_id)
+            VALUES (${title}, ${amount}, ${category}, ${user_id})
+            RETURNING *
+        `;
+
+        console.log(transaction);
+        res.status(201).json({ message: "Transaction created successfully", transaction: transaction[0] });
+
+
+    }catch (error){
+        console.error("Error creating transaction:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+});
+
+// Initialize DB and start server
+initDB().then(() => {
+    app.listen(PORT, () => {
         console.log(`Server is running on port ${PORT}`);
     });
 });

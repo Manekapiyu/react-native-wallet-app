@@ -21,7 +21,7 @@ async function initDB() {
         title VARCHAR(255) NOT NULL,
         amount DECIMAL(10,2) NOT NULL,
         category VARCHAR(100),
-        created_at DATE NOT NULL DEFAULT CURRENT_DATE
+        create_at DATE NOT NULL DEFAULT CURRENT_DATE
       )
     `;
 
@@ -46,7 +46,7 @@ app.post("/api/transactions", async (req, res) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Insert in the correct order 👇
+    // Insert transaction
     const transaction = await sql`
       INSERT INTO transactions (title, amount, category, user_id)
       VALUES (${title}, ${amount}, ${category}, ${user_id})
@@ -64,9 +64,25 @@ app.post("/api/transactions", async (req, res) => {
   }
 });
 
-app.get("/api/transactions/:userId",async(req,res)=>{
-    
-})
+// Get transactions by user
+app.get("/api/transactions/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Fix: use correct column name and variable
+    const transactions = await sql`
+      SELECT * FROM transactions 
+      WHERE user_id = ${userId} 
+      ORDER BY create_at DESC
+    `;
+
+    res.status(200).json(transactions);
+
+  } catch (error) {
+    console.error("Error fetching transactions:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 // Start server after DB init
 initDB().then(() => {

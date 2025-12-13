@@ -1,6 +1,4 @@
-// styles/home.styles.js
 import { StyleSheet } from "react-native";
-// Update the import path below if your 'constants' folder is named differently or located elsewhere
 import { COLORS } from "../../constants/colors";
 
 export const styles = StyleSheet.create({

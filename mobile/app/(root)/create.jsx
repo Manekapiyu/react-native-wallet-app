@@ -24,11 +24,10 @@ const CATEGORIES = [
   { id: "other", name: "Other", icon: "ellipsis-horizontal" },
 ];
 
-// Helper: always read body once
 const parseResponse = async (response) => {
-  const text = await response.text(); // consume once
+  const text = await response.text();
   try {
-    return JSON.parse(text); // try JSON
+    return JSON.parse(text);
   } catch {
     throw new Error(`Unexpected server response: ${text}`);
   }

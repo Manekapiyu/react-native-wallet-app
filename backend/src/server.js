@@ -9,29 +9,46 @@ import job from "./config/cron.js";
 dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5001;
 
-if (process.env.NODE_ENV === "production") job.start();
+// Start cron job only in production
+if (process.env.NODE_ENV === "production") {
+  job.start();
+}
 
-// middleware
+// Middleware
 app.use(rateLimiter);
 app.use(express.json());
 
-// our custom simple middleware
-// app.use((req, res, next) => {
-//   console.log("Hey we hit a req, the method is", req.method);
-//   next();
-// });
-
-const PORT = process.env.PORT || 5001;
-
+// Health check route
 app.get("/api/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
+// Transactions routes
 app.use("/api/transactions", transactionsRoute);
 
-initDB().then(() => {
-  app.listen(PORT, () => {
-    console.log("Server is up and running on PORT:", PORT);
+// Catch-all for unknown routes (always JSON)
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+// Global error handler (always JSON)
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err);
+  res.status(err.status || 500).json({
+    message: err.message || "Internal Server Error",
   });
 });
+
+// Initialize DB and start server
+initDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on http://localhost:${PORT} (env: ${process.env.NODE_ENV})`);
+    });
+  })
+  .catch((err) => {
+    console.error(" Failed to initialize database:", err);
+    process.exit(1);
+  });

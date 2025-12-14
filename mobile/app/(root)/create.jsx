@@ -24,6 +24,16 @@ const CATEGORIES = [
   { id: "other", name: "Other", icon: "ellipsis-horizontal" },
 ];
 
+// Helper: always read body once
+const parseResponse = async (response) => {
+  const text = await response.text(); // consume once
+  try {
+    return JSON.parse(text); // try JSON
+  } catch {
+    throw new Error(`Unexpected server response: ${text}`);
+  }
+};
+
 const CreateScreen = () => {
   const router = useRouter();
   const { user } = useUser();
@@ -49,7 +59,7 @@ const CreateScreen = () => {
         ? -Math.abs(parseFloat(amount))
         : Math.abs(parseFloat(amount));
 
-      const response = await fetch(`${API_URL}/transactions`, {
+      const response = await fetch(`${API_URL}/api/transactions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -60,18 +70,10 @@ const CreateScreen = () => {
         }),
       });
 
-      // Get raw text first to prevent JSON parse error
-      const text = await response.text();
-
-      let data;
-      try {
-        data = JSON.parse(text); // attempt to parse JSON
-      } catch {
-        throw new Error(`Server returned invalid response: ${text}`);
-      }
+      const data = await parseResponse(response);
 
       if (!response.ok) {
-        throw new Error(data.message || "Failed to create transaction");
+        throw new Error(data?.message || "Failed to create transaction");
       }
 
       Alert.alert("Success", "Transaction created successfully");

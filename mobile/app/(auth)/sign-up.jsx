@@ -66,8 +66,6 @@ export default function SignUpScreen() {
         console.error(JSON.stringify(signUpAttempt, null, 2));
       }
     } catch (err) {
-      // See https://clerk.com/docs/custom-flows/error-handling
-      // for more info on error handling
       console.error(JSON.stringify(err, null, 2));
     }
   };
@@ -75,6 +73,7 @@ export default function SignUpScreen() {
   if (pendingVerification) {
     return (
       <View style={styles.verificationContainer}>
+        <Image source={require("../../assets/images/revenue-i3.png")} style={styles.illustration} />
         <Text style={styles.verificationTitle}>Verify your email</Text>
 
         {error ? (
@@ -91,7 +90,7 @@ export default function SignUpScreen() {
           style={[styles.verificationInput, error && styles.errorInput]}
           value={code}
           placeholder="Enter your verification code"
-          placeholderTextColor="#9A8478"
+          placeholderTextColor="#7b9a78ff"
           onChangeText={(code) => setCode(code)}
         />
 
@@ -128,7 +127,7 @@ export default function SignUpScreen() {
           style={[styles.input, error && styles.errorInput]}
           autoCapitalize="none"
           value={emailAddress}
-          placeholderTextColor="#9A8478"
+          placeholderTextColor="#789a7dff"
           placeholder="Enter email"
           onChangeText={(email) => setEmailAddress(email)}
         />
@@ -137,7 +136,7 @@ export default function SignUpScreen() {
           style={[styles.input, error && styles.errorInput]}
           value={password}
           placeholder="Enter password"
-          placeholderTextColor="#9A8478"
+          placeholderTextColor="#839a78ff"
           secureTextEntry={true}
           onChangeText={(password) => setPassword(password)}
         />
